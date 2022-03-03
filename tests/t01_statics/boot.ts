@@ -1,6 +1,6 @@
 import { Server } from 'http'
 import { AddressInfo, ListenOptions } from 'net'
-import { TunApplication } from 'tun'
+import { TunApplication } from '@tunframework/tun'
 
 export function prepareApp(
   option: ListenOptions = { host: 'localhost', port: 0 }

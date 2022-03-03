@@ -2,11 +2,10 @@ import assert from 'assert'
 import { prepareApp } from './boot.js'
 
 import { readFileSync } from 'fs'
-import { extname, resolve } from 'path'
-import { fileURLToPath } from 'url'
+import { resolve } from 'path'
 import fetch from 'node-fetch'
 
-import statics from '../../lib/index.js'
+import statics from '../../src/index.js'
 
 describe(`t01_statics`, () => {
   it(`#statics`, (done) => {

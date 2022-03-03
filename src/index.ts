@@ -2,9 +2,28 @@
 import fs from 'fs'
 import { join, extname } from 'path'
 // import { URL } from "url";
-import { TunContext, RAW_REQUEST, RAW_RESPONSE, getMimeByExt } from 'tun'
-import type { TunComposable } from 'tun'
+import {
+  TunContext,
+  RAW_REQUEST,
+  RAW_RESPONSE,
+  mimeExtMap
+} from '@tunframework/tun'
+import type { TunComposable } from '@tunframework/tun'
 import crypto from 'crypto'
+
+/**
+ * @internal
+ */
+export function _getMimeByExt(ext: string) {
+  for (const key in mimeExtMap) {
+    if (Object.prototype.hasOwnProperty.call(mimeExtMap, key)) {
+      if (mimeExtMap[key].split(' ').indexOf(ext) > -1) {
+        return key
+      }
+    }
+  }
+  return null
+}
 
 export interface StaticsOptions {
   getMIME?: (pathname: string) => string
@@ -46,7 +65,7 @@ export default function statics(
 
     const mime =
       (typeof getMIME === 'function' && getMIME(pathname)) ||
-      getMimeByExt(extname(pathname).substring(1)) ||
+      _getMimeByExt(extname(pathname).substring(1)) ||
       (allowUnknownMimeWithExts ? 'application/octet-stream' : '')
 
     if (!cache && mime) {
