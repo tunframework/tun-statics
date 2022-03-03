@@ -40,7 +40,7 @@ export interface StaticsOptions {
   allowUnknownMimeWithExts?: boolean
 }
 
-export default function statics(
+export function statics(
   _options: StaticsOptions = {}
 ): TunComposable<TunContext> {
   const {

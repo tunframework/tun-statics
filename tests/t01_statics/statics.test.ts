@@ -5,7 +5,7 @@ import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import fetch from 'node-fetch'
 
-import statics from '../../src/index.js'
+import { statics } from '../../src/index.js'
 
 describe(`t01_statics`, () => {
   it(`#statics`, (done) => {
@@ -25,7 +25,7 @@ describe(`t01_statics`, () => {
         // dir: process.cwd(),
         // dir: resolve(fileURLToPath(import.meta.url), '../')
         dir: __dirname,
-        prefix: prefix
+        prefix
         // getMIME: (pathname) => {
         //   if (extname(pathname) === '.json') {
         //     return `application/json`;
