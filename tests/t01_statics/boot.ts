@@ -10,24 +10,21 @@ export function prepareApp(
   return {
     app,
     boot: (
-      cb: (server: Server, url: string) => Promise<void>,
+      // cb: (server: Server, url: string) => Promise<void>,
       option: ListenOptions = { host: '127.0.0.1', port: 0 }
-    ) => {
-      const server = app.listen(option)
-      server.on('listening', async () => {
-        let addr = (server.address() || {}) as AddressInfo
-        const url =
-          'http://' + [addr.address, addr.port].filter(Boolean).join(':')
-        // console.log(`temp test app url: ${url}`)
-        // assert.ok(url, `server url should not be empty`);
-        try {
-          await cb(server, url)
-        } finally {
-          closeServer(server)
-        }
+    ): Promise<{ server: Server; url: string }> => {
+      return new Promise((resolve, reject) => {
+        const server = app.listen(option)
+        server.on('listening', async () => {
+          let addr = (server.address() || {}) as AddressInfo
+          const url =
+            'http://' + [addr.address, addr.port].filter(Boolean).join(':')
+
+          resolve({ server, url })
+        })
       })
-      return server
-    }
+    },
+    closeServer
   }
 }
 

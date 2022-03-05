@@ -8,15 +8,19 @@ import fetch from 'node-fetch'
 import { statics } from '../../src/index.js'
 
 describe(`t01_statics`, () => {
-  it(`#statics`, (done) => {
+  it(`#statics`, async () => {
     const __dirname = resolve(process.cwd(), 'tests/t01_statics')
-    const filename = 'foo.json'
-    const fooStr = readFileSync(resolve(__dirname, filename), {
-      encoding: 'utf-8'
-    })
-    assert.ok(fooStr, `${filename} should not be empty`)
+    const filenames = [
+      // 'foo.json',
+      'index.html'
+    ]
+    const fileContents = filenames.map((filename) =>
+      readFileSync(resolve(__dirname, filename), {
+        encoding: 'utf-8'
+      })
+    )
 
-    const { app, boot } = prepareApp()
+    const { app, boot, closeServer } = prepareApp()
 
     const prefix = '/test-statics'
 
@@ -35,18 +39,28 @@ describe(`t01_statics`, () => {
       })
     )
 
-    boot(async (server, url) => {
-      // console.log(`${url}${prefix}/${filename}`);
-      const res = await fetch(`${url}${prefix}/${filename}`, { method: 'GET' })
-      const result: any = await res.text()
+    const { server, url } = await boot()
+    try {
+      for (let i = 0; i < filenames.length; i++) {
+        const filename = filenames[i]
+        const fileContent = fileContents[i]
 
-      try {
+        const pathname = `${prefix}/${
+          filename === 'index.html' ? '' : filename
+        }`
+
+        const res = await fetch(`${url}${pathname}`, { method: 'GET' })
         assert.notEqual(404, res.status, `${filename} should be found`)
-        assert.ok(result, `should return result`)
-        done()
-      } catch (error) {
-        done(error)
+        if (filename.endsWith('.json')) {
+          const result: any = await res.json()
+          assert.deepEqual(JSON.parse(fileContent), result)
+        } else {
+          const result: any = await res.text()
+          assert.equal(fileContent, result)
+        }
       }
-    })
+    } finally {
+      closeServer(server)
+    }
   })
 })
