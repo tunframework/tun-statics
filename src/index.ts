@@ -17,7 +17,7 @@ import crypto from 'crypto'
 export function _getMimeByExt(ext: string) {
   for (const key in mimeExtMap) {
     if (Object.prototype.hasOwnProperty.call(mimeExtMap, key)) {
-      if (mimeExtMap[key].split(' ').indexOf(ext) > -1) {
+      if (mimeExtMap[key] && mimeExtMap[key].split(' ').indexOf(ext) > -1) {
         return key
       }
     }
@@ -98,6 +98,10 @@ export function statics(
     }
     if (!mime) {
       mime = _getMimeByExt(extname(pathname).substring(1)) || ''
+    }
+    // decide mime by file
+    if (!mime) {
+      mime = _getMimeByExt(extname(staticPath).substring(1)) || ''
     }
     if (!mime && allowUnknownMimeWithExts) {
       mime = 'application/octet-stream'
