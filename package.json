@@ -1,6 +1,6 @@
 {
   "name": "@tunframework/tun-statics",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "handle statoc files for tun",
   "main": "lib/cjs/index.js",
   "types": "lib/types/index.d.ts",
