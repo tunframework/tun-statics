@@ -3,7 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   '@commitlint/cli': ^16.2.1
   '@commitlint/config-conventional': ^16.2.1
-  '@tunframework/tun': ^2.0.5
+  '@tunframework/tun': ^2.0.6
   '@types/mocha': ^9.1.0
   '@types/node': ^17.0.21
   '@typescript-eslint/eslint-plugin': ^5.12.1
@@ -25,7 +25,7 @@ specifiers:
 devDependencies:
   '@commitlint/cli': 16.2.1
   '@commitlint/config-conventional': 16.2.1
-  '@tunframework/tun': registry.npmjs.org/@tunframework/tun/2.0.5
+  '@tunframework/tun': registry.npmjs.org/@tunframework/tun/2.0.6
   '@types/mocha': 9.1.0
   '@types/node': 17.0.21
   '@typescript-eslint/eslint-plugin': 5.12.1_aa3af6382115a42a71cc388b7b2c30b3
@@ -3350,10 +3350,10 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  registry.npmjs.org/@tunframework/tun/2.0.5:
-    resolution: {integrity: sha512-JtgNNWwBten16Eaubqf4q+2ExXxV5mj89geuyIOKz7OCG/OQueElnVct4KLI+3t2DUAdWn8VVo9JSsM8k4tXIQ==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@tunframework/tun/-/tun-2.0.5.tgz}
+  registry.npmjs.org/@tunframework/tun/2.0.6:
+    resolution: {integrity: sha512-Zy8a+P3fbPVdn0Xf2KXtsOx6aUmtt6OVXDmJCFNqb+SVaeurQ9Bmaxca4mp6RFopgDRta+bg85etC3l6tBXFFg==, registry: https://registry.npmjs.com/, tarball: https://registry.npmjs.org/@tunframework/tun/-/tun-2.0.6.tgz}
     name: '@tunframework/tun'
-    version: 2.0.5
+    version: 2.0.6
     engines: {node: '>=12.2.0'}
     dev: true
 

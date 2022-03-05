@@ -38,6 +38,11 @@ export interface StaticsOptions {
   cache?: boolean
 
   allowUnknownMimeWithExts?: boolean
+  /**
+   * index
+   * @default "index.html"
+   */
+  index?: string | string[]
 }
 
 export function statics(
@@ -48,7 +53,8 @@ export function statics(
     dir = '',
     prefix = '',
     cache = false,
-    allowUnknownMimeWithExts = false
+    allowUnknownMimeWithExts = false,
+    index = 'index.html'
   } = _options || {}
   return async (ctx, next) => {
     const _res = ctx.res[RAW_RESPONSE]
@@ -63,95 +69,103 @@ export function statics(
       }
     }
 
-    const mime =
-      (typeof getMIME === 'function' && getMIME(pathname)) ||
-      _getMimeByExt(extname(pathname).substring(1)) ||
-      (allowUnknownMimeWithExts ? 'application/octet-stream' : '')
-
-    if (!cache && mime) {
-      let staticPath = join(dir, pathname)
-      if (fs.existsSync(staticPath)) {
-        // const buf = fs.readFileSync(staticPath);
-
-        ctx.res.status = 200
-        ctx.res.type = {
-          rawType: mime
+    let staticPath = join(dir, pathname)
+    let staticExists = fs.existsSync(staticPath)
+    if (
+      !staticExists ||
+      ((!pathname || pathname.endsWith('/')) &&
+        fs.statSync(staticPath).isDirectory())
+    ) {
+      // Try resolve index
+      let indexes = index ? (Array.isArray(index) ? index : [index]) : []
+      for (const item of indexes) {
+        let _staticPath = join(staticPath, item)
+        let _staticExists = fs.existsSync(_staticPath)
+        if (_staticExists) {
+          staticPath = _staticPath
+          staticExists = true
+          break
         }
-        _res.writeHead(ctx.res.status, ctx.res.message)
-
-        fs.createReadStream(staticPath).pipe(_res)
-        // _res.write(buf);
-        // _res.end();
-        return next()
-      } else {
-        // console.log('statics not found', staticPath)
-        // _res.writeHead(404);
-        return next()
       }
     }
+    if (!staticExists) {
+      return next()
+    }
 
-    if (cache && mime) {
-      let staticPath = join(dir, pathname)
-      if (fs.existsSync(staticPath)) {
-        const ifNoneMatch = ctx.req.headers['if-none-match']
-        const hash = crypto.createHash('md5')
-        const buf = fs.readFileSync(staticPath)
-        hash.update(buf)
-        const etag = `"${hash.digest('hex')}"`
-        if (ifNoneMatch === etag) {
-          ctx.res.status = 304
-          ctx.res.type = {
-            rawType: mime
-          }
-          _res.writeHead(ctx.res.status, ctx.res.message)
+    let mime = ''
+    if (!mime && typeof getMIME === 'function') {
+      mime = getMIME(pathname)
+    }
+    if (!mime) {
+      mime = _getMimeByExt(extname(pathname).substring(1)) || ''
+    }
+    if (!mime && allowUnknownMimeWithExts) {
+      mime = 'application/octet-stream'
+    }
 
-          _res.end()
+    if (!mime) {
+      return next()
+    }
 
-          return next()
-        } else {
-          _res.setHeader('etag', etag)
-        }
+    if (!cache) {
+      ctx.res.status = 200
+      ctx.res.type = {
+        rawType: mime
+      }
+      _res.writeHead(ctx.res.status, ctx.res.message)
 
-        const ifModifiedSince = ctx.req.headers['if-modified-since'] || ''
-        const stat = fs.statSync(staticPath)
-        if (new Date(ifModifiedSince).getTime() === stat.mtime.getTime()) {
-          ctx.res.status = 304
-          ctx.res.type = {
-            rawType: mime
-          }
-          _res.writeHead(ctx.res.status, ctx.res.message)
+      fs.createReadStream(staticPath).pipe(_res)
+      // _res.write(buf);
+      // _res.end();
+      return next()
+    }
 
-          _res.end()
-
-          return next()
-        } else {
-          _res.setHeader('last-modified', stat.mtime.toUTCString())
-        }
-
-        ctx.res.status = 200
+    if (cache) {
+      const ifNoneMatch = ctx.req.headers['if-none-match']
+      const hash = crypto.createHash('md5')
+      const buf = fs.readFileSync(staticPath)
+      hash.update(buf)
+      const etag = `"${hash.digest('hex')}"`
+      if (ifNoneMatch === etag) {
+        ctx.res.status = 304
         ctx.res.type = {
           rawType: mime
         }
         _res.writeHead(ctx.res.status, ctx.res.message)
 
-        // fs.createReadStream(staticPath).pipe(ctx.res);
-        _res.write(buf)
         _res.end()
+
         return next()
       } else {
-        // console.log('statics not found', staticPath)
-        // _res.writeHead(404);
-        return next()
+        _res.setHeader('etag', etag)
       }
-      return next()
-    } else {
-      // exception not-found should trigger by router
-      // _res.writeHead(404);
-      // return Promise.resolve();
 
+      const ifModifiedSince = ctx.req.headers['if-modified-since'] || ''
+      const stat = fs.statSync(staticPath)
+      if (new Date(ifModifiedSince).getTime() === stat.mtime.getTime()) {
+        ctx.res.status = 304
+        ctx.res.type = {
+          rawType: mime
+        }
+        _res.writeHead(ctx.res.status, ctx.res.message)
+
+        _res.end()
+
+        return next()
+      } else {
+        _res.setHeader('last-modified', stat.mtime.toUTCString())
+      }
+
+      ctx.res.status = 200
+      ctx.res.type = {
+        rawType: mime
+      }
+      _res.writeHead(ctx.res.status, ctx.res.message)
+
+      // fs.createReadStream(staticPath).pipe(ctx.res);
+      _res.write(buf)
+      _res.end()
       return next()
     }
-    // console.log(`static ${pathname} mime=${mime}`);
-    return next()
-  }
+  } // end middleware
 }
