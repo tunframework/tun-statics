@@ -1,6 +1,6 @@
 # tun-rest-router
 
-handle statoc files for tun
+handle static files for tun
 
 ## install
 
